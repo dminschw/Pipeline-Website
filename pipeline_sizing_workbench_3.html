@@ -1,0 +1,794 @@
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   A "pipeline data sheet" aesthetic: drafting-paper background,
+   stenciled industrial type, steel/safety-yellow/rust accents.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --paper:#ECE7DA;
+  --paper-line:#D8D2C0;
+  --ink:#1B242B;
+  --ink-soft:#4B565D;
+  --steel:#5C6B73;
+  --steel-dark:#3D474D;
+  --safety-yellow:#F0B429;
+  --rust:#B54A24;
+  --pass-green:#3F6B4C;
+  --grid-line: rgba(27,36,43,0.07);
+}
+
+*{box-sizing:border-box;}
+
+.workbench{
+  font-family:'IBM Plex Sans', sans-serif;
+  color:var(--ink);
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+    var(--paper);
+  padding:28px 20px 40px;
+  max-width:1100px;
+  margin:0 auto;
+  border:1px solid var(--paper-line);
+}
+
+/* ---------- Header (nameplate) ---------- */
+.header{
+  border-bottom:3px solid var(--ink);
+  padding-bottom:14px;
+  margin-bottom:24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.header h1{
+  font-family:'Oswald', sans-serif;
+  font-weight:600;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-size:28px;
+  margin:0;
+}
+.header .sub{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--ink-soft);
+  letter-spacing:0.5px;
+}
+.tag{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  border:1px solid var(--ink);
+  padding:4px 8px;
+  letter-spacing:1px;
+}
+
+/* ---------- Section shell ---------- */
+.section{
+  margin-bottom:26px;
+}
+.section-title{
+  font-family:'Oswald', sans-serif;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-size:15px;
+  font-weight:600;
+  color:var(--ink);
+  border-left:5px solid var(--steel);
+  padding-left:10px;
+  margin-bottom:14px;
+}
+
+/* ---------- Flow requirement panel ---------- */
+.flow-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+  gap:14px;
+  align-items:end;
+}
+.field label{
+  display:block;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.6px;
+  color:var(--ink-soft);
+  margin-bottom:5px;
+  font-family:'IBM Plex Mono', monospace;
+}
+.field input, .field select{
+  width:100%;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:14px;
+  padding:8px 9px;
+  border:1px solid var(--steel);
+  background:#fff;
+  color:var(--ink);
+}
+.field input:focus, .field select:focus{
+  outline:2px solid var(--ink);
+  outline-offset:1px;
+}
+
+.result-strip{
+  margin-top:16px;
+  padding:16px;
+  background:#fff;
+  border:1px solid var(--ink);
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.result-strip .big{
+  font-family:'Oswald', sans-serif;
+  font-size:38px;
+  font-weight:600;
+}
+.result-strip .label{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+}
+
+/* ---------- Material tabs (hanging pipe tags) ---------- */
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:0;
+}
+.tab-btn{
+  font-family:'Oswald', sans-serif;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-size:14px;
+  font-weight:600;
+  padding:10px 18px 12px;
+  border:1px solid var(--ink);
+  border-bottom:none;
+  background:var(--paper-line);
+  color:var(--ink-soft);
+  cursor:pointer;
+  position:relative;
+  top:1px;
+}
+.tab-btn.active{
+  background:#fff;
+  color:var(--ink);
+  border-bottom:1px solid #fff;
+}
+.tab-btn .swatch{
+  display:inline-block;
+  width:10px;height:10px;
+  margin-right:7px;
+  border-radius:50%;
+}
+.tab-btn[data-mat="steel"] .swatch{background:var(--steel);}
+.tab-btn[data-mat="hdpe"] .swatch{background:var(--safety-yellow); border:1px solid var(--ink);}
+
+.panel{
+  border:1px solid var(--ink);
+  background:#fff;
+  padding:22px;
+  display:none;
+  grid-template-columns: 1.1fr 1fr;
+  gap:24px;
+}
+.panel.active{display:grid;}
+@media (max-width:720px){
+  .panel{grid-template-columns:1fr;}
+}
+
+.panel-inputs .field{margin-bottom:12px;}
+.divider{border:none;border-top:1px dashed var(--paper-line); margin:16px 0;}
+
+.calc-out{
+  margin-top:14px;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:13px;
+  line-height:1.9;
+}
+.calc-out b{color:var(--ink);}
+.calc-out .row{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px dotted var(--paper-line);
+  padding:2px 0;
+}
+
+/* ---------- Diagram + stamp ---------- */
+.diagram-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+}
+.stamp{
+  font-family:'Oswald', sans-serif;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  font-weight:700;
+  font-size:14px;
+  border:3px solid currentColor;
+  padding:6px 14px;
+  transform:rotate(-8deg);
+  margin-top:10px;
+  display:inline-block;
+}
+.stamp.pass{color:var(--pass-green);}
+.stamp.fail{color:var(--rust);}
+.diagram-caption{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:10px;
+  color:var(--ink-soft);
+  margin-top:6px;
+  text-align:center;
+}
+
+.footer-note{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  color:var(--ink-soft);
+  border-top:1px solid var(--paper-line);
+  margin-top:28px;
+  padding-top:14px;
+  line-height:1.6;
+}
+</style>
+
+<div class="workbench">
+
+  <div class="header">
+    <div>
+      <h1>Pipeline Sizing Workbench</h1>
+      <div class="sub">Diameter &amp; wall thickness — carbon steel / HDPE</div>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+      <div class="tag">FOR PRELIMINARY / EDUCATIONAL USE</div>
+      <a href="pipe_dimensions_chart.html" style="font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink); text-decoration:none; border:1px solid var(--ink); padding:5px 9px;">Pipe dimensions &amp; weights chart &rarr;</a>
+    </div>
+  </div>
+
+  <!-- ================= STEP 1: FLOW → REQUIRED DIAMETER ================= -->
+  <div class="section">
+    <div class="section-title">01 — Required Inside Diameter (from flow)</div>
+
+    <div class="tabs" style="margin-bottom:16px;">
+      <button class="tab-btn" data-method="velocity" id="methodBtnVelocity" style="display:none;"><span class="swatch" style="background:var(--steel);"></span>Max velocity</button>
+      <button class="tab-btn active" data-method="pdrop" id="methodBtnPdrop"><span class="swatch" style="background:var(--safety-yellow); border:1px solid var(--ink);"></span>Pipeline Diameter Calculator</button>
+    </div>
+
+    <div class="flow-grid">
+      <div class="field">
+        <label for="flowRate">Flow rate</label>
+        <input type="number" id="flowRate" value="2000" step="any" min="0">
+      </div>
+      <div class="field">
+        <label for="flowUnit">Flow unit</label>
+        <select id="flowUnit">
+          <option value="mscfd">Mscfd (thousand scf/day)</option>
+          <option value="mmscfd">MMscfd (million scf/day)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="flowTemp">Flowing temperature (°F)</label>
+        <input type="number" id="flowTemp" value="70" step="any">
+      </div>
+    </div>
+
+    <!-- ---- Velocity-method-only fields (hidden for now — see pdrop tab) ---- -->
+    <div class="flow-grid method-fields" id="velocityFields" style="margin-top:14px; display:none;">
+      <div class="field">
+        <label for="velocity">Max. allowable velocity</label>
+        <input type="number" id="velocity" value="6" step="any" min="0.01">
+      </div>
+      <div class="field">
+        <label for="velUnit">Velocity unit</label>
+        <select id="velUnit">
+          <option value="fts">ft/s</option>
+          <option value="ms">m/s</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="flowPressure">Flowing pressure (psig)</label>
+        <input type="number" id="flowPressure" value="600" step="any" min="0">
+      </div>
+    </div>
+
+    <!-- ---- Pressure-drop-method-only fields ---- -->
+    <div class="flow-grid method-fields" id="pdropFields" style="margin-top:14px;">
+      <div class="field" style="grid-column: 1 / -1;">
+        <label for="flowEquation">Flow equation</label>
+        <select id="flowEquation">
+          <option value="weymouth">Weymouth</option>
+          <option value="panhandleA">Panhandle A</option>
+          <option value="panhandleB">Panhandle B</option>
+        </select>
+        <div id="eqDescription" style="font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-soft); margin-top:6px; line-height:1.5;"></div>
+      </div>
+      <div class="field">
+        <label for="upstreamP">Upstream (inlet) pressure (psig)</label>
+        <input type="number" id="upstreamP" value="800" step="any" min="0">
+      </div>
+      <div class="field">
+        <label for="downstreamP">Downstream (outlet) pressure (psig)</label>
+        <input type="number" id="downstreamP" value="650" step="any" min="0">
+      </div>
+      <div class="field">
+        <label for="pipeLength">Pipe length (miles)</label>
+        <input type="number" id="pipeLength" value="10" step="any" min="0.001">
+      </div>
+      <div class="field">
+        <label for="gasGravity">Gas specific gravity (air = 1)</label>
+        <input type="number" id="gasGravity" value="0.60" step="any" min="0.01">
+      </div>
+      <div class="field">
+        <label for="zFactor">Compressibility factor, Z</label>
+        <input type="number" id="zFactor" value="1.00" step="any" min="0.1" max="1.2">
+      </div>
+    </div>
+
+    <div class="result-strip">
+      <div>
+        <div class="big" id="reqIdIn">--</div>
+        <div class="label">in (required min. ID)</div>
+      </div>
+      <div>
+        <div class="big" id="reqIdMm">--</div>
+        <div class="label">mm (required min. ID)</div>
+      </div>
+    </div>
+    <div class="calc-out" style="margin-top:10px; display:none;" id="velocityCalcOut">
+      <div class="row"><span>Standard-condition flow, converted to ft³/s</span><b id="qStdOut">--</b></div>
+      <div class="row"><span>Actual flow at flowing P &amp; T (used for sizing)</span><b id="qActualOut">--</b></div>
+    </div>
+    <div class="calc-out" style="margin-top:10px;" id="pdropCalcOut">
+      <div class="row"><span>Equation used</span><b id="pdropEqOut">--</b></div>
+      <div class="row"><span>P<sub>1</sub>&sup2; − P<sub>2</sub>&sup2; (psia&sup2;)</span><b id="pdropDeltaP2Out">--</b></div>
+    </div>
+  </div>
+
+  <!-- ================= STEP 2: MATERIAL TABS ================= -->
+  <div class="section">
+    <div class="section-title">02 — Wall Thickness &amp; Resulting Bore</div>
+    <div class="tabs">
+      <button class="tab-btn material-tab active" data-mat="steel"><span class="swatch"></span>Carbon Steel</button>
+      <button class="tab-btn material-tab" data-mat="hdpe"><span class="swatch"></span>HDPE</button>
+    </div>
+
+    <!-- ---------- STEEL PANEL ---------- -->
+    <div class="panel active" id="panel-steel">
+      <div class="panel-inputs">
+        <div class="field">
+          <label for="steelGrade">Pipe grade (SMYS)</label>
+          <select id="steelGrade">
+            <option value="35000">API 5L Grade B — 35,000 psi</option>
+            <option value="42000">API 5L X42 — 42,000 psi</option>
+            <option value="52000">API 5L X52 — 52,000 psi</option>
+            <option value="60000">API 5L X60 — 60,000 psi</option>
+            <option value="65000">API 5L X65 — 65,000 psi</option>
+            <option value="70000">API 5L X70 — 70,000 psi</option>
+            <option value="custom">Custom SMYS…</option>
+          </select>
+        </div>
+        <div class="field" id="customSmysField" style="display:none;">
+          <label for="customSmys">Custom SMYS (psi)</label>
+          <input type="number" id="customSmys" value="35000" step="any" min="1">
+        </div>
+        <div class="field">
+          <label for="designPressure">Design pressure, P (psi)</label>
+          <input type="number" id="designPressure" value="600" step="any" min="0">
+        </div>
+        <div class="field">
+          <label for="designFactor">Design/location factor, F</label>
+          <select id="designFactor">
+            <option value="0.72">0.72 — Class 1 (B31.8 typical)</option>
+            <option value="0.60">0.60 — Class 2</option>
+            <option value="0.50">0.50 — Class 3</option>
+            <option value="0.40">0.40 — Class 4</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="jointFactor">Longitudinal joint factor, E</label>
+          <select id="jointFactor">
+            <option value="1.0">1.00 — Seamless / ERW / EFW</option>
+            <option value="0.80">0.80 — Furnace lap weld</option>
+            <option value="0.60">0.60 — Furnace butt weld</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tempFactor">Temperature derating factor, T</label>
+          <input type="number" id="tempFactor" value="1.0" step="0.01" min="0.1" max="1">
+        </div>
+        <div class="field">
+          <label for="millTol"><input type="checkbox" id="millTol" checked style="width:auto;margin-right:6px;">Apply -12.5% mill tolerance (API 5L)</label>
+        </div>
+        <div class="field">
+          <label for="steelOD">Trial outside diameter — NPS (in)</label>
+          <select id="steelOD"></select>
+        </div>
+
+        <div class="calc-out" id="steelCalcOut"></div>
+      </div>
+
+      <div class="diagram-wrap">
+        <div id="steelSvgHolder"></div>
+        <div id="steelStamp"></div>
+        <div class="diagram-caption">Schematic cross-section — wall proportion accurate,<br>absolute scale exaggerated for clarity.</div>
+      </div>
+    </div>
+
+    <!-- ---------- HDPE PANEL ---------- -->
+    <div class="panel" id="panel-hdpe">
+      <div class="panel-inputs">
+        <div class="field">
+          <label for="hdpeGrade">Pipe compound (HDS @ 73°F)</label>
+          <select id="hdpeGrade">
+            <option value="1600">PE4710 — HDS 1600 psi</option>
+            <option value="800">PE3608 / PE3408 — HDS 800 psi</option>
+            <option value="custom">Custom HDS…</option>
+          </select>
+        </div>
+        <div class="field" id="customHdsField" style="display:none;">
+          <label for="customHds">Custom HDS (psi)</label>
+          <input type="number" id="customHds" value="1000" step="any" min="1">
+        </div>
+        <div class="field">
+          <label for="hdpePressure">Desired pressure rating, PR (psi)</label>
+          <input type="number" id="hdpePressure" value="150" step="any" min="0">
+        </div>
+        <div class="field">
+          <label for="hdpeOD">Trial outside diameter — IPS (in)</label>
+          <select id="hdpeOD"></select>
+        </div>
+
+        <div class="calc-out" id="hdpeCalcOut"></div>
+      </div>
+
+      <div class="diagram-wrap">
+        <div id="hdpeSvgHolder"></div>
+        <div id="hdpeStamp"></div>
+        <div class="diagram-caption">Schematic cross-section — wall proportion accurate,<br>absolute scale exaggerated for clarity.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    This tool implements simplified, transparent versions of standard pipeline formulas
+    (ASME B31.4/B31.8-style Barlow equation for steel; ISO/AWWA C906 dimension-ratio
+    equation for HDPE) for preliminary sizing and learning purposes only. Always verify
+    final design against the current edition of the applicable code, site-specific
+    location class, and a licensed Professional Engineer before construction.
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   UNIT CONVERSIONS
+   Everything is normalized to SI internally (m3/s, m/s, meters)
+   then converted back for display. Keeping one internal system
+   avoids "unit soup" bugs — the most common mistake in tools
+   like this.
+   ============================================================ */
+// Mscfd/MMscfd are standard cubic feet per day (scf @ standard conditions,
+// typically 14.65-14.73 psia & 60°F depending on the contract/meter spec).
+// Converting day -> seconds gives ft3/s, then ft3/s -> m3/s via 0.0283168.
+const CFS_TO_M3S = 0.0283168;
+const FLOW_TO_M3S = {
+  mscfd:  (1000    / 86400) * CFS_TO_M3S, // thousand scf/day
+  mmscfd: (1000000 / 86400) * CFS_TO_M3S  // million scf/day
+};
+const VEL_TO_MS = { fts: 0.3048, ms: 1 };
+const M_TO_IN = 39.3701;
+const IN_TO_MM = 25.4;
+
+/* ============================================================
+   STANDARD PIPE OUTSIDE DIAMETERS (NPS / IPS)
+   Sourced from a standard carbon steel pipe dimensions chart.
+   HDPE pipe ordered as "IPS" sizing shares these same OD values,
+   so both dropdowns below draw from one list.
+   ============================================================ */
+const NPS_OD_IN = [{"nps": "1/8", "od_in": 0.405}, {"nps": "1/4", "od_in": 0.54}, {"nps": "3/8", "od_in": 0.675}, {"nps": "1/2", "od_in": 0.84}, {"nps": "3/4", "od_in": 1.05}, {"nps": "1", "od_in": 1.315}, {"nps": "1-1/4", "od_in": 1.66}, {"nps": "1-1/2", "od_in": 1.9}, {"nps": "2", "od_in": 2.375}, {"nps": "2-1/2", "od_in": 2.875}, {"nps": "3", "od_in": 3.5}, {"nps": "3-1/2", "od_in": 4.0}, {"nps": "4", "od_in": 4.5}, {"nps": "4-1/2", "od_in": 5.0}, {"nps": "5", "od_in": 5.563}, {"nps": "6", "od_in": 6.625}, {"nps": "7", "od_in": 7.625}, {"nps": "8", "od_in": 8.625}, {"nps": "9", "od_in": 9.625}, {"nps": "10", "od_in": 10.75}, {"nps": "11", "od_in": 11.75}, {"nps": "12", "od_in": 12.75}, {"nps": "14", "od_in": 14.0}, {"nps": "16", "od_in": 16.0}, {"nps": "18", "od_in": 18.0}, {"nps": "20", "od_in": 20.0}, {"nps": "22", "od_in": 22.0}, {"nps": "24", "od_in": 24.0}, {"nps": "26", "od_in": 26.0}, {"nps": "28", "od_in": 28.0}, {"nps": "30", "od_in": 30.0}, {"nps": "32", "od_in": 32.0}, {"nps": "34", "od_in": 34.0}, {"nps": "36", "od_in": 36.0}, {"nps": "42", "od_in": 42.0}, {"nps": "48", "od_in": 48.0}];
+
+function populateODDropdown(selectId, defaultNPS){
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = NPS_OD_IN.map(p =>
+    `<option value="${p.od_in}" ${p.nps === defaultNPS ? 'selected' : ''}>NPS ${p.nps} — OD ${p.od_in.toFixed(3)} in</option>`
+  ).join('');
+}
+populateODDropdown('steelOD', '8');
+populateODDropdown('hdpeOD', '8');
+
+// Standard conditions commonly used for natural gas (scf basis).
+// Different contracts/meters use slightly different values (14.65-14.73
+// psia is typical) — 14.73 psia / 60°F is used here as a reasonable default.
+const P_STD_PSIA = 14.73;
+const T_STD_R = 60 + 459.67; // Rankine
+
+let sizingMethod = 'pdrop'; // 'velocity' | 'pdrop'  (velocity method hidden for now, kept for later)
+
+/* ============================================================
+   GAS FLOW EQUATIONS (Weymouth / Panhandle A / Panhandle B)
+   General form:  Q = C * (Tb/Pb)^a * [(P1²-P2²)/(G^b * Tf * L * Z)]^c * D^e
+   Q = scfd, D = inside diameter (in), L = miles, T = Rankine, P = psia.
+   Solved for D:  D = { Q / [C*(Tb/Pb)^a*(...)^c] } ^ (1/e)
+   Constants are the standard published coefficients for each equation.
+   ============================================================ */
+const FLOW_EQUATIONS = {
+  weymouth:   { label: 'Weymouth',    C: 433.5,  a: 1.0,    b: 1.0,    c: 0.5,    e: 2.667,
+    description: 'Best suited to shorter, smaller-diameter gathering and distribution lines with higher velocity/more turbulent flow. Widely used, but tends to over-predict capacity (i.e. under-size the pipe) on long, large-diameter transmission runs.' },
+  panhandleA: { label: 'Panhandle A', C: 435.87, a: 1.0788, b: 0.8539, c: 0.5394, e: 2.6182,
+    description: 'Developed for long-distance, large-volume transmission lines operating at moderate pressure with partially turbulent flow. Assumes a lower, more conservative friction factor than Weymouth — a common choice for cross-country gas transmission mains.' },
+  panhandleB: { label: 'Panhandle B', C: 737,    a: 1.02,   b: 0.961,  c: 0.51,   e: 2.53,
+    description: '("Modified Panhandle") Calibrated for large-diameter, high-pressure, high-Reynolds-number transmission pipelines. The standard choice for major interstate/long-haul gas transmission systems moving large volumes over long distances.' }
+};
+
+function requiredID_pressureDrop(){
+  const Q = parseFloat(document.getElementById('flowRate').value) || 0;
+  const flowUnit = document.getElementById('flowUnit').value;
+  const T_flow_F = parseFloat(document.getElementById('flowTemp').value) || 60;
+  const eqKey = document.getElementById('flowEquation').value;
+  const P1_psig = parseFloat(document.getElementById('upstreamP').value) || 0;
+  const P2_psig = parseFloat(document.getElementById('downstreamP').value) || 0;
+  const L_miles = parseFloat(document.getElementById('pipeLength').value) || 0.001;
+  const G = parseFloat(document.getElementById('gasGravity').value) || 0.6;
+  const Z = parseFloat(document.getElementById('zFactor').value) || 1.0;
+
+  // Q must be in scfd (standard cubic feet per day) for these equations.
+  const Q_scfd = flowUnit === 'mmscfd' ? Q * 1e6 : Q * 1e3;
+
+  const P1_psia = P1_psig + 14.7;
+  const P2_psia = P2_psig + 14.7;
+  const Tf_R = T_flow_F + 459.67;
+  const eq = FLOW_EQUATIONS[eqKey];
+
+  const deltaP2 = Math.max(P1_psia * P1_psia - P2_psia * P2_psia, 0);
+  const bracket = deltaP2 / (Math.pow(G, eq.b) * Tf_R * L_miles * Z);
+  const coefficient = eq.C * Math.pow(T_STD_R / P_STD_PSIA, eq.a) * Math.pow(bracket, eq.c);
+
+  const D_in = Math.pow(Q_scfd / coefficient, 1 / eq.e);
+
+  document.getElementById('pdropEqOut').textContent = eq.label;
+  document.getElementById('pdropDeltaP2Out').textContent = deltaP2.toFixed(1);
+
+  return D_in; // required inside diameter, inches
+}
+
+function requiredID_velocity(){
+  const Q = parseFloat(document.getElementById('flowRate').value) || 0;
+  const flowUnit = document.getElementById('flowUnit').value;
+  const V = parseFloat(document.getElementById('velocity').value) || 0.0001;
+  const velUnit = document.getElementById('velUnit').value;
+  const P_flow_psig = parseFloat(document.getElementById('flowPressure').value) || 0;
+  const T_flow_F = parseFloat(document.getElementById('flowTemp').value) || 60;
+
+  // Mscfd/MMscfd are volumes at STANDARD conditions. Gas actually takes up
+  // far less space once compressed to pipeline pressure, so the velocity
+  // calculation needs the ACTUAL (flowing) volumetric rate, not the
+  // standard one. Ideal gas law: Q_actual = Q_std * (P_std/P_actual) * (T_actual/T_std)
+  // (Compressibility factor Z is omitted here for simplicity — a more
+  // rigorous version would divide by Z_std and multiply by Z_actual too.)
+  const Q_std_m3s = Q * FLOW_TO_M3S[flowUnit];
+  const P_flow_psia = P_flow_psig + 14.7;
+  const T_flow_R = T_flow_F + 459.67;
+  const correction = (P_STD_PSIA / P_flow_psia) * (T_flow_R / T_STD_R);
+  const Q_actual_m3s = Q_std_m3s * correction;
+
+  const V_ms  = V * VEL_TO_MS[velUnit];
+
+  // Continuity equation: Q = A * V  ->  A = Q / V
+  const A_m2 = Q_actual_m3s / V_ms;
+  // Circular area: A = pi * (D/2)^2  ->  D = sqrt(4A/pi)
+  const D_m = Math.sqrt((4 * A_m2) / Math.PI);
+  const D_in = D_m * M_TO_IN;
+
+  document.getElementById('qStdOut').textContent = (Q_std_m3s / CFS_TO_M3S).toFixed(2) + ' ft³/s';
+  document.getElementById('qActualOut').textContent = (Q_actual_m3s / CFS_TO_M3S).toFixed(2) + ' ft³/s';
+
+  return D_in;
+}
+
+function computeRequiredID(){
+  const D_in = sizingMethod === 'pdrop' ? requiredID_pressureDrop() : requiredID_velocity();
+
+  document.getElementById('reqIdIn').textContent = D_in.toFixed(2);
+  document.getElementById('reqIdMm').textContent = (D_in * IN_TO_MM).toFixed(1);
+
+  return D_in; // inches — used by both material panels below
+}
+
+/* ============================================================
+   SVG CROSS-SECTION DIAGRAM
+   Draws two concentric circles (OD, ID) with dimension lines,
+   scaled so the OUTER circle always fills the same visual size
+   (150px radius) — the ratio ID/OD is preserved exactly, so the
+   drawn wall thickness always LOOKS proportionally correct even
+   though the absolute scale isn't literal.
+   ============================================================ */
+function drawPipeSVG(od, id, wall, unitLabel){
+  const R = 150; // fixed visual outer radius in px
+  const innerR = R * (id / od);
+  const cx = 200, cy = 200;
+
+  return `
+  <svg viewBox="0 0 400 400" width="320" height="320" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--ink,#1B242B)"/>
+      </marker>
+    </defs>
+
+    <!-- outer pipe wall -->
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#5C6B73" stroke-width="3"/>
+    <!-- bore -->
+    <circle cx="${cx}" cy="${cy}" r="${innerR}" fill="#ECE7DA" stroke="#1B242B" stroke-width="1.5"/>
+
+    <!-- OD dimension line -->
+    <line x1="${cx-R}" y1="40" x2="${cx+R}" y2="40" stroke="#1B242B" stroke-width="1"
+          marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <line x1="${cx-R}" y1="34" x2="${cx-R}" y2="46" stroke="#1B242B" stroke-width="1"/>
+    <line x1="${cx+R}" y1="34" x2="${cx+R}" y2="46" stroke="#1B242B" stroke-width="1"/>
+    <text x="${cx}" y="28" font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle" fill="#1B242B">
+      OD ${od.toFixed(3)} ${unitLabel}
+    </text>
+
+    <!-- wall thickness callout -->
+    <line x1="${cx}" y1="${cy-R}" x2="${cx}" y2="${cy-innerR}" stroke="#B54A24" stroke-width="2"/>
+    <text x="${cx+8}" y="${cy-(R+innerR)/2}" font-family="IBM Plex Mono, monospace" font-size="12" fill="#B54A24">
+      t = ${wall.toFixed(3)} ${unitLabel}
+    </text>
+
+    <!-- ID label -->
+    <text x="${cx}" y="${cy+5}" font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle" fill="#1B242B">
+      ID ${id.toFixed(3)} ${unitLabel}
+    </text>
+  </svg>`;
+}
+
+/* ============================================================
+   STEEL PANEL — ASME B31.4/B31.8-style Barlow equation:
+     t_pressure = (P * OD) / (2 * SMYS * F * E * T)
+   Then add corrosion allowance and (optionally) divide by 0.875
+   to cover the standard API 5L -12.5% manufacturing tolerance.
+   ============================================================ */
+function calcSteel(reqID_in){
+  const gradeSel = document.getElementById('steelGrade').value;
+  const SMYS = gradeSel === 'custom'
+    ? (parseFloat(document.getElementById('customSmys').value) || 35000)
+    : parseFloat(gradeSel);
+
+  const P = parseFloat(document.getElementById('designPressure').value) || 0;
+  const F = parseFloat(document.getElementById('designFactor').value);
+  const E = parseFloat(document.getElementById('jointFactor').value);
+  const T = parseFloat(document.getElementById('tempFactor').value) || 1;
+  const useMillTol = document.getElementById('millTol').checked;
+  const OD = parseFloat(document.getElementById('steelOD').value) || 0.001;
+
+  const t_pressure = (P * OD) / (2 * SMYS * F * E * T);
+  const t_nominal = useMillTol ? (t_pressure / 0.875) : t_pressure;
+
+  const ID = OD - 2 * t_nominal;
+  const meets = ID >= reqID_in;
+
+  document.getElementById('steelCalcOut').innerHTML = `
+    <div class="row"><span>Pressure design thickness, t</span><b>${t_pressure.toFixed(4)} in</b></div>
+    <div class="row"><span>Nominal order wall${useMillTol ? ' (÷0.875)' : ''}</span><b>${t_nominal.toFixed(4)} in</b></div>
+    <div class="row"><span>Resulting inside diameter</span><b>${ID.toFixed(3)} in</b></div>
+    <div class="row"><span>Required inside diameter</span><b>${reqID_in.toFixed(3)} in</b></div>
+  `;
+
+  document.getElementById('steelSvgHolder').innerHTML = drawPipeSVG(OD, Math.max(ID,0.01), t_nominal, 'in');
+  document.getElementById('steelStamp').innerHTML =
+    `<div class="stamp ${meets ? 'pass' : 'fail'}">${meets ? 'Meets flow requirement' : 'Increase OD — ID too small'}</div>`;
+}
+
+/* ============================================================
+   HDPE PANEL — ISO / AWWA C906 dimension-ratio equation:
+     PR = 2*HDS / (DR - 1)   ->   DR_required = (2*HDS/PR) + 1
+   We then pick the nearest STANDARD SDR that is at least as
+   thick (i.e. the largest standard SDR number <= DR_required)
+   the way you would when actually ordering pipe.
+   ============================================================ */
+const STANDARD_SDRS = [32.5, 26, 21, 17, 13.5, 11, 9, 7.3];
+
+function calcHDPE(reqID_in){
+  const gradeSel = document.getElementById('hdpeGrade').value;
+  const HDS = gradeSel === 'custom'
+    ? (parseFloat(document.getElementById('customHds').value) || 1000)
+    : parseFloat(gradeSel);
+
+  const PR = parseFloat(document.getElementById('hdpePressure').value) || 0.001;
+  const OD = parseFloat(document.getElementById('hdpeOD').value) || 0.001;
+
+  const DR_required = (2 * HDS / PR) + 1;
+  // Pick the largest standard SDR that does not exceed what's required
+  // (smaller SDR = thicker wall = more conservative)
+  let SDR_selected = STANDARD_SDRS[STANDARD_SDRS.length - 1];
+  for (const sdr of STANDARD_SDRS){
+    if (sdr <= DR_required){ SDR_selected = sdr; break; }
+  }
+  const t = OD / SDR_selected;
+  const ID = OD - 2 * t;
+  const meets = ID >= reqID_in;
+
+  document.getElementById('hdpeCalcOut').innerHTML = `
+    <div class="row"><span>Required DR (unrounded)</span><b>${DR_required.toFixed(2)}</b></div>
+    <div class="row"><span>Selected standard SDR</span><b>SDR ${SDR_selected}</b></div>
+    <div class="row"><span>Wall thickness, t = OD/SDR</span><b>${t.toFixed(4)} in</b></div>
+    <div class="row"><span>Resulting inside diameter</span><b>${ID.toFixed(3)} in</b></div>
+    <div class="row"><span>Required inside diameter</span><b>${reqID_in.toFixed(3)} in</b></div>
+  `;
+
+  document.getElementById('hdpeSvgHolder').innerHTML = drawPipeSVG(OD, Math.max(ID,0.01), t, 'in');
+  document.getElementById('hdpeStamp').innerHTML =
+    `<div class="stamp ${meets ? 'pass' : 'fail'}">${meets ? 'Meets flow requirement' : 'Increase OD — ID too small'}</div>`;
+}
+
+/* ============================================================
+   WIRING — recalculate everything whenever any input changes
+   ============================================================ */
+function recalcAll(){
+  const reqID = computeRequiredID();
+  calcSteel(reqID);
+  calcHDPE(reqID);
+}
+
+document.querySelectorAll('.workbench input, .workbench select').forEach(el => {
+  el.addEventListener('input', recalcAll);
+  el.addEventListener('change', recalcAll);
+});
+
+// custom SMYS / HDS field toggles
+document.getElementById('steelGrade').addEventListener('change', function(){
+  document.getElementById('customSmysField').style.display = this.value === 'custom' ? 'block' : 'none';
+});
+document.getElementById('hdpeGrade').addEventListener('change', function(){
+  document.getElementById('customHdsField').style.display = this.value === 'custom' ? 'block' : 'none';
+});
+
+// method-toggle button wiring (see below)
+function updateEquationDescription(){
+  const eqKey = document.getElementById('flowEquation').value;
+  document.getElementById('eqDescription').textContent = FLOW_EQUATIONS[eqKey].description;
+}
+document.getElementById('flowEquation').addEventListener('change', updateEquationDescription);
+updateEquationDescription();
+
+// sizing method toggle (velocity vs pressure-drop)
+document.getElementById('methodBtnVelocity').addEventListener('click', function(){
+  sizingMethod = 'velocity';
+  this.classList.add('active');
+  document.getElementById('methodBtnPdrop').classList.remove('active');
+  document.getElementById('velocityFields').style.display = '';
+  document.getElementById('pdropFields').style.display = 'none';
+  document.getElementById('velocityCalcOut').style.display = '';
+  document.getElementById('pdropCalcOut').style.display = 'none';
+  recalcAll();
+});
+document.getElementById('methodBtnPdrop').addEventListener('click', function(){
+  sizingMethod = 'pdrop';
+  this.classList.add('active');
+  document.getElementById('methodBtnVelocity').classList.remove('active');
+  document.getElementById('velocityFields').style.display = 'none';
+  document.getElementById('pdropFields').style.display = '';
+  document.getElementById('velocityCalcOut').style.display = 'none';
+  document.getElementById('pdropCalcOut').style.display = '';
+  recalcAll();
+});
+
+// tab switching
+document.querySelectorAll('.material-tab').forEach(btn => {
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.material-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('panel-' + this.dataset.mat).classList.add('active');
+  });
+});
+
+recalcAll();
+</script>
