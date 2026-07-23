@@ -690,7 +690,7 @@ function calcSteel(reqID_in){
 
   document.getElementById('steelCalcOut').innerHTML = `
     <div class="row"><span>Pressure design thickness, t</span><b>${t_pressure.toFixed(4)} in</b></div>
-    <div class="row"><span>Standard pipe thickness (next chart size up)</span><b>${t_nominal.toFixed(4)} in</b></div>
+    <div class="row"><span>Standard pipe thickness</span><b>${t_nominal.toFixed(4)} in</b></div>
     <div class="row"><span>Resulting inside diameter</span><b>${ID.toFixed(3)} in</b></div>
     <div class="row"><span>Required inside diameter</span><b>${reqID_in.toFixed(3)} in</b></div>
     ${noWallFound ? `<div class="row" style="color:var(--rust);"><span colspan="2">No listed wall for this OD is thick enough — consider the next larger OD.</span></div>` : ''}
