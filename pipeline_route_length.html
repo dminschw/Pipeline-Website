@@ -1,0 +1,490 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css');
+
+:root{
+  --paper:#ECE7DA;
+  --paper-line:#D8D2C0;
+  --ink:#1B242B;
+  --ink-soft:#4B565D;
+  --steel:#5C6B73;
+  --safety-yellow:#F0B429;
+  --rust:#B54A24;
+  --pass-green:#3F6B4C;
+  --grid-line: rgba(27,36,43,0.07);
+}
+*{box-sizing:border-box;}
+.routewrap{
+  font-family:'IBM Plex Sans', sans-serif;
+  color:var(--ink);
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+    var(--paper);
+  padding:28px 20px 40px;
+  max-width:1100px;
+  margin:0 auto;
+  border:1px solid var(--paper-line);
+}
+.header{
+  border-bottom:3px solid var(--ink);
+  padding-bottom:14px;
+  margin-bottom:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.header h1{
+  font-family:'Oswald', sans-serif;
+  font-weight:600;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-size:26px;
+  margin:0;
+}
+.header .sub{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--ink-soft);
+}
+.nav-links{ display:flex; gap:8px; flex-wrap:wrap; }
+.nav-link{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  color:var(--ink);
+  text-decoration:none;
+  border:1px solid var(--ink);
+  padding:5px 9px;
+  white-space:nowrap;
+}
+.nav-link:hover{ background:var(--ink); color:var(--paper); }
+
+.instructions{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--ink-soft);
+  background:#fff;
+  border:1px solid var(--paper-line);
+  padding:10px 14px;
+  margin-bottom:14px;
+  line-height:1.6;
+}
+.instructions b{ color:var(--ink); }
+
+.map-panel{
+  border:2px solid var(--ink);
+  background:#fff;
+  padding:6px;
+  margin-bottom:16px;
+}
+#map{
+  height:520px;
+  width:100%;
+}
+
+.controls-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:16px;
+}
+.layer-toggle{ display:flex; gap:8px; }
+.layer-btn{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11.5px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  padding:7px 12px;
+  border:1px solid var(--steel);
+  background:#fff;
+  color:var(--ink-soft);
+  cursor:pointer;
+}
+.layer-btn.active{ background:var(--steel); color:#fff; }
+.clear-btn{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11.5px;
+  padding:7px 12px;
+  border:1px solid var(--rust);
+  background:#fff;
+  color:var(--rust);
+  cursor:pointer;
+}
+.clear-btn:hover{ background:var(--rust); color:#fff; }
+
+.result-strip{
+  padding:16px;
+  background:#fff;
+  border:1px solid var(--ink);
+  display:flex;
+  align-items:baseline;
+  gap:22px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.result-strip .big{
+  font-family:'Oswald', sans-serif;
+  font-size:38px;
+  font-weight:600;
+}
+.result-strip .label{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+}
+.copy-btn{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  padding:8px 14px;
+  border:1px solid var(--ink);
+  background:var(--safety-yellow);
+  color:var(--ink);
+  cursor:pointer;
+  font-weight:600;
+}
+.copy-btn:hover{ filter:brightness(0.95); }
+
+.segment-list{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12.5px;
+  background:#fff;
+  border:1px solid var(--paper-line);
+  padding:10px 14px;
+}
+.segment-list .row{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px dotted var(--paper-line);
+  padding:4px 0;
+}
+.segment-list .empty{ color:var(--ink-soft); font-style:italic; }
+
+.footer-note{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  color:var(--ink-soft);
+  border-top:1px solid var(--paper-line);
+  margin-top:22px;
+  padding-top:14px;
+  line-height:1.6;
+}
+</style>
+
+<div class="routewrap">
+  <div class="header">
+    <div>
+      <h1>Pipeline Route Length</h1>
+      <div class="sub">Draw a proposed route on the map to measure its length</div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">&larr; Sizing workbench</a>
+      <a class="nav-link" href="pipe_dimensions_chart.html">Dimensions chart</a>
+    </div>
+  </div>
+
+  <div class="instructions">
+    <b>Click</b> on the map to place points along the route, or use <b>Import route file</b> to
+    load an existing route from a <b>.kml</b>, <b>.kmz</b>, shapefile <b>.zip</b>, or
+    <b>.geojson</b> file. <b>Click the last point again</b> (or press Enter) to finish a
+    hand-drawn segment — you can draw or import more than one if the route has separate legs.
+    Use the edit tool (pencil icon) to drag points, or the trash icon to delete a segment.
+    Switch between street and satellite views below to help spot terrain, roads, and
+    waterways along the corridor.
+  </div>
+
+  <div class="controls-row">
+    <div class="layer-toggle">
+      <button class="layer-btn active" id="btnStreet">Street</button>
+      <button class="layer-btn" id="btnSatellite">Satellite</button>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <label for="fileImport" class="layer-btn" style="cursor:pointer;">Import route file</label>
+      <input type="file" id="fileImport" accept=".kml,.kmz,.zip,.shp,.geojson,.json" style="display:none;">
+      <button class="clear-btn" id="btnClearAll">Clear all segments</button>
+    </div>
+  </div>
+  <div id="importStatus" style="font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-soft); margin-top:-8px; margin-bottom:14px;"></div>
+
+  <div class="map-panel">
+    <div id="map"></div>
+  </div>
+
+  <div class="result-strip">
+    <div>
+      <div class="big" id="totalMiles">0.00</div>
+      <div class="label">miles</div>
+    </div>
+    <div>
+      <div class="big" id="totalFeet">0</div>
+      <div class="label">feet</div>
+    </div>
+    <div>
+      <div class="big" id="totalKm">0.00</div>
+      <div class="label">km</div>
+    </div>
+    <button class="copy-btn" id="btnCopy">Copy miles for calculator</button>
+  </div>
+
+  <div class="segment-list" id="segmentList">
+    <div class="empty">No segments drawn yet.</div>
+  </div>
+
+  <div class="footer-note">
+    Map data &copy; OpenStreetMap contributors. Satellite imagery via Esri World Imagery.
+    Route length is computed as great-circle distance between the points you place or
+    import, summed across all segments — it does not account for terrain, elevation
+    change, or routing around obstacles, so treat it as a preliminary straight-line-corridor
+    estimate. Imported files are parsed entirely in your browser; nothing is uploaded to a
+    server. For shapefiles, upload a <b>.zip</b> containing the .shp/.dbf/.prj/.shx files
+    together so the coordinates are reprojected correctly — a lone .shp file is read as-is
+    and assumed to already be in WGS84 lat/lon. Copy the resulting mileage into the
+    "Pipe length (miles)" field on the sizing workbench.
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shpjs/6.2.0/shp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
+<script>
+// Default view — recentered on the user's device location if they allow it,
+// otherwise falls back to a general US view.
+const DEFAULT_CENTER = [36.0056, -95.9686];
+const DEFAULT_ZOOM = 11;
+
+const map = L.map('map').setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+
+const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
+  maxZoom: 19
+}).addTo(map);
+
+const satelliteLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: 'Esri, Maxar, Earthstar Geographics', maxZoom: 19 }
+);
+
+document.getElementById('btnStreet').addEventListener('click', function(){
+  map.removeLayer(satelliteLayer);
+  streetLayer.addTo(map);
+  this.classList.add('active');
+  document.getElementById('btnSatellite').classList.remove('active');
+});
+document.getElementById('btnSatellite').addEventListener('click', function(){
+  map.removeLayer(streetLayer);
+  satelliteLayer.addTo(map);
+  this.classList.add('active');
+  document.getElementById('btnStreet').classList.remove('active');
+});
+
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    pos => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
+    () => { /* permission denied or unavailable — keep default view */ }
+  );
+}
+
+// Feature group holds every drawn route segment (polyline).
+const drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+const drawControl = new L.Control.Draw({
+  draw: {
+    polyline: { shapeOptions: { color: '#B54A24', weight: 4 } },
+    polygon: false,
+    rectangle: false,
+    circle: false,
+    circlemarker: false,
+    marker: false
+  },
+  edit: {
+    featureGroup: drawnItems,
+    remove: true
+  }
+});
+map.addControl(drawControl);
+
+// Great-circle length of one polyline's vertices, summed segment-to-segment.
+// Handles both simple polylines (flat LatLng array) and multi-part
+// polylines from MultiLineString imports (array of LatLng arrays).
+function polylineLengthMeters(layer){
+  const latlngs = layer.getLatLngs();
+  const parts = Array.isArray(latlngs[0]) ? latlngs : [latlngs];
+  let total = 0;
+  parts.forEach(part => {
+    for (let i = 1; i < part.length; i++){
+      total += part[i - 1].distanceTo(part[i]);
+    }
+  });
+  return total;
+}
+
+function refreshResults(){
+  let totalMeters = 0;
+  const segments = [];
+  drawnItems.eachLayer(layer => {
+    const len = polylineLengthMeters(layer);
+    totalMeters += len;
+    segments.push(len);
+  });
+
+  const miles = totalMeters / 1609.344;
+  const feet = totalMeters * 3.28084;
+  const km = totalMeters / 1000;
+
+  document.getElementById('totalMiles').textContent = miles.toFixed(2);
+  document.getElementById('totalFeet').textContent = Math.round(feet).toLocaleString();
+  document.getElementById('totalKm').textContent = km.toFixed(2);
+
+  const listEl = document.getElementById('segmentList');
+  if (segments.length === 0){
+    listEl.innerHTML = '<div class="empty">No segments drawn yet.</div>';
+  } else {
+    listEl.innerHTML = segments.map((len, i) =>
+      `<div class="row"><span>Segment ${i + 1}</span><span>${(len / 1609.344).toFixed(3)} mi (${(len * 3.28084).toFixed(0)} ft)</span></div>`
+    ).join('');
+  }
+}
+
+map.on(L.Draw.Event.CREATED, function(e){
+  drawnItems.addLayer(e.layer);
+  refreshResults();
+});
+map.on(L.Draw.Event.EDITED, refreshResults);
+map.on(L.Draw.Event.DELETED, refreshResults);
+
+document.getElementById('btnClearAll').addEventListener('click', function(){
+  drawnItems.clearLayers();
+  refreshResults();
+});
+
+document.getElementById('btnCopy').addEventListener('click', function(){
+  const miles = document.getElementById('totalMiles').textContent;
+  navigator.clipboard.writeText(miles).then(() => {
+    this.textContent = 'Copied!';
+    setTimeout(() => { this.textContent = 'Copy miles for calculator'; }, 1500);
+  }).catch(() => {
+    alert('Could not copy automatically — the value is: ' + miles + ' miles');
+  });
+});
+
+/* ============================================================
+   ROUTE FILE IMPORT — .kml, .kmz, shapefile .zip, or .geojson/.json
+   All parsing happens in the browser; nothing is uploaded anywhere.
+   ============================================================ */
+const importStatus = document.getElementById('importStatus');
+
+function setImportStatus(msg, isError){
+  importStatus.textContent = msg;
+  importStatus.style.color = isError ? 'var(--rust)' : 'var(--ink-soft)';
+}
+
+// Add every LineString/MultiLineString feature from a GeoJSON object as a
+// route segment. Non-line features (points, polygons — common in KML
+// files that also carry placemarks or regions) are counted and skipped.
+function addGeoJSONRoutes(geojson){
+  let added = 0, skipped = 0;
+  const layerGroup = L.geoJSON(geojson, {
+    filter: feature => {
+      const t = feature && feature.geometry && feature.geometry.type;
+      const isLine = t === 'LineString' || t === 'MultiLineString';
+      if (!isLine) skipped++;
+      return isLine;
+    }
+  });
+  layerGroup.eachLayer(layer => {
+    drawnItems.addLayer(layer);
+    added++;
+  });
+  if (added > 0) {
+    map.fitBounds(drawnItems.getBounds());
+  }
+  refreshResults();
+  return { added, skipped };
+}
+
+function handleImportedFile(file){
+  const name = file.name.toLowerCase();
+  setImportStatus('Reading ' + file.name + '…', false);
+
+  const finish = (result) => {
+    if (result.added === 0) {
+      setImportStatus('No line/route geometry found in ' + file.name + '.', true);
+    } else {
+      const skippedNote = result.skipped > 0 ? ` (${result.skipped} non-line feature(s) skipped)` : '';
+      setImportStatus(`Imported ${result.added} route segment(s) from ${file.name}${skippedNote}.`, false);
+    }
+  };
+  const fail = (err) => {
+    console.error(err);
+    setImportStatus('Could not read ' + file.name + ': ' + (err.message || err), true);
+  };
+
+  if (name.endsWith('.kml')) {
+    file.text().then(text => {
+      const xml = new DOMParser().parseFromString(text, 'text/xml');
+      const geojson = toGeoJSON.kml(xml);
+      finish(addGeoJSONRoutes(geojson));
+    }).catch(fail);
+
+  } else if (name.endsWith('.kmz')) {
+    file.arrayBuffer().then(buf => JSZip.loadAsync(buf)).then(zip => {
+      const kmlName = Object.keys(zip.files).find(n => n.toLowerCase().endsWith('.kml'));
+      if (!kmlName) throw new Error('no .kml file found inside the .kmz archive');
+      return zip.files[kmlName].async('text');
+    }).then(text => {
+      const xml = new DOMParser().parseFromString(text, 'text/xml');
+      const geojson = toGeoJSON.kml(xml);
+      finish(addGeoJSONRoutes(geojson));
+    }).catch(fail);
+
+  } else if (name.endsWith('.zip')) {
+    // Expected to be a zipped shapefile bundle (.shp + .dbf + .prj + .shx).
+    file.arrayBuffer().then(buf => shp(buf)).then(geojson => {
+      // shpjs returns a single FeatureCollection, or an array of them if
+      // the zip contains more than one shapefile layer.
+      const collections = Array.isArray(geojson) ? geojson : [geojson];
+      let added = 0, skipped = 0;
+      collections.forEach(fc => {
+        const r = addGeoJSONRoutes(fc);
+        added += r.added; skipped += r.skipped;
+      });
+      finish({ added, skipped });
+    }).catch(fail);
+
+  } else if (name.endsWith('.shp')) {
+    // A lone .shp with no .dbf/.prj alongside it — geometry only, and
+    // assumed to already be in WGS84 lat/lon since there's no .prj to
+    // reproject from. For anything with a real projection, upload a
+    // .zip containing the .shp/.dbf/.prj/.shx together instead.
+    file.arrayBuffer().then(buf => shp.parseShp(buf)).then(geometries => {
+      const fc = { type: 'FeatureCollection', features: geometries.map(g => ({ type: 'Feature', properties: {}, geometry: g })) };
+      finish(addGeoJSONRoutes(fc));
+    }).catch(fail);
+
+  } else if (name.endsWith('.geojson') || name.endsWith('.json')) {
+    file.text().then(text => {
+      finish(addGeoJSONRoutes(JSON.parse(text)));
+    }).catch(fail);
+
+  } else {
+    setImportStatus('Unsupported file type: ' + file.name, true);
+  }
+}
+
+document.getElementById('fileImport').addEventListener('change', function(){
+  if (this.files && this.files[0]) {
+    handleImportedFile(this.files[0]);
+    this.value = ''; // allow re-selecting the same file later
+  }
+});
+
+refreshResults();
+</script>
