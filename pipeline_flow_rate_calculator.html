@@ -1,0 +1,470 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --paper:#ECE7DA;
+  --paper-line:#D8D2C0;
+  --ink:#1B242B;
+  --ink-soft:#4B565D;
+  --steel:#5C6B73;
+  --safety-yellow:#F0B429;
+  --rust:#B54A24;
+  --pass-green:#3F6B4C;
+  --grid-line: rgba(27,36,43,0.07);
+}
+*{box-sizing:border-box;}
+.workbench{
+  font-family:'IBM Plex Sans', sans-serif;
+  color:var(--ink);
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+    var(--paper);
+  padding:28px 20px 40px;
+  max-width:1100px;
+  margin:0 auto;
+  border:1px solid var(--paper-line);
+}
+.header{
+  border-bottom:3px solid var(--ink);
+  padding-bottom:14px;
+  margin-bottom:24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.header h1{
+  font-family:'Oswald', sans-serif;
+  font-weight:600;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-size:28px;
+  margin:0;
+}
+.header .sub{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--ink-soft);
+}
+.nav-links{ display:flex; gap:8px; flex-wrap:wrap; }
+.nav-link{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  color:var(--ink);
+  text-decoration:none;
+  border:1px solid var(--ink);
+  padding:5px 9px;
+  white-space:nowrap;
+}
+.nav-link:hover{ background:var(--ink); color:var(--paper); }
+
+.section{ margin-bottom:26px; }
+.section-title{
+  font-family:'Oswald', sans-serif;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-size:15px;
+  font-weight:600;
+  color:var(--ink);
+  border-left:5px solid var(--steel);
+  padding-left:10px;
+  margin-bottom:14px;
+}
+
+.flow-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  gap:14px;
+  align-items:end;
+}
+.field label{
+  display:block;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.6px;
+  color:var(--ink-soft);
+  margin-bottom:5px;
+  font-family:'IBM Plex Mono', monospace;
+}
+.field input, .field select{
+  width:100%;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:14px;
+  padding:8px 9px;
+  border:1px solid var(--steel);
+  background:#fff;
+  color:var(--ink);
+}
+.field input:focus, .field select:focus{
+  outline:2px solid var(--ink);
+  outline-offset:1px;
+}
+
+.pipe-summary{
+  margin-top:14px;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:13px;
+  color:var(--ink-soft);
+  background:#fff;
+  border:1px solid var(--paper-line);
+  padding:10px 14px;
+}
+
+.eq-description{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11.5px;
+  color:var(--ink-soft);
+  margin-top:6px;
+  line-height:1.5;
+}
+
+.result-panel{
+  background:#fff;
+  border:2px solid var(--ink);
+  padding:18px 20px;
+}
+.result-panel .governing{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.result-panel .big{
+  font-family:'Oswald', sans-serif;
+  font-size:44px;
+  font-weight:600;
+}
+.result-panel .label{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+}
+.constraint-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 0;
+  border-top:1px dotted var(--paper-line);
+  font-family:'IBM Plex Mono', monospace;
+  font-size:13px;
+}
+.constraint-row .val{ font-weight:600; }
+.constraint-badge{
+  font-family:'Oswald', sans-serif;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  font-size:10.5px;
+  font-weight:600;
+  padding:2px 8px;
+  border:1px solid currentColor;
+  margin-left:8px;
+}
+.constraint-badge.governs{ color:var(--rust); }
+.constraint-badge.slack{ color:var(--pass-green); }
+
+.footer-note{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  color:var(--ink-soft);
+  border-top:1px solid var(--paper-line);
+  margin-top:28px;
+  padding-top:14px;
+  line-height:1.6;
+}
+</style>
+
+<div class="workbench">
+  <div class="header">
+    <div>
+      <h1>Maximum Flow Rate Calculator</h1>
+      <div class="sub">Given a pipe size, find the flow it can actually carry</div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">&larr; Diameter calculator</a>
+      <a class="nav-link" href="pipe_dimensions_chart.html">Dimensions chart</a>
+      <a class="nav-link" href="pipeline_route_length.html">Route length</a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">01 — Pipe Size</div>
+    <div class="flow-grid">
+      <div class="field">
+        <label for="pipeOD">Outside diameter — NPS</label>
+        <select id="pipeOD"></select>
+      </div>
+      <div class="field">
+        <label for="pipeWall">Standard wall thickness</label>
+        <select id="pipeWall"></select>
+      </div>
+    </div>
+    <div class="pipe-summary" id="pipeSummary">—</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">02 — Velocity Limit</div>
+    <div class="flow-grid">
+      <div class="field">
+        <label for="maxVelocity">Max. allowable velocity</label>
+        <input type="number" id="maxVelocity" value="6" step="any" min="0.01">
+      </div>
+      <div class="field">
+        <label for="velUnit">Velocity unit</label>
+        <select id="velUnit">
+          <option value="fts">ft/s</option>
+          <option value="ms">m/s</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">03 — Pressure Limit (Weymouth equation)</div>
+    <div class="flow-grid">
+      <div class="field">
+        <label for="upstreamP">Upstream (inlet) pressure (psig)</label>
+        <input type="number" id="upstreamP" value="800" step="any" min="0">
+      </div>
+      <div class="field">
+        <label for="downstreamP">Downstream (outlet) pressure (psig)</label>
+        <input type="number" id="downstreamP" value="650" step="any" min="0">
+      </div>
+      <div class="field">
+        <label for="flowTemp">Flowing temperature (°F)</label>
+        <input type="number" id="flowTemp" value="70" step="any">
+      </div>
+      <div class="field">
+        <label for="pipeLength">Pipe length (miles)</label>
+        <input type="number" id="pipeLength" value="10" step="any" min="0.001">
+      </div>
+      <div class="field">
+        <label for="gasGravity">Gas specific gravity (air = 1)</label>
+        <input type="number" id="gasGravity" value="0.60" step="any" min="0.01">
+      </div>
+      <div class="field">
+        <label for="zFactor">Compressibility factor, Z</label>
+        <input type="number" id="zFactor" value="1.00" step="any" min="0.1" max="1.2">
+      </div>
+    </div>
+    <div class="eq-description">This section uses the Weymouth equation — best suited to shorter, smaller-diameter gathering and distribution lines with higher velocity/more turbulent flow. It tends to over-predict capacity on long, large-diameter transmission runs.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">04 — Maximum Flow Rate</div>
+    <div class="result-panel">
+      <div class="governing">
+        <div>
+          <div class="big" id="governingFlow">--</div>
+          <div class="label" id="governingUnit">MMscfd</div>
+        </div>
+        <div class="label" id="governingNote">—</div>
+      </div>
+
+      <div class="constraint-row">
+        <span>Velocity-limited flow (Sec. 02)</span>
+        <span><span class="val" id="velLimitedFlow">--</span> MMscfd <span class="constraint-badge" id="velBadge"></span></span>
+      </div>
+      <div class="constraint-row">
+        <span>Weymouth-limited flow (Sec. 03)</span>
+        <span><span class="val" id="eqLimitedFlow">--</span> MMscfd <span class="constraint-badge" id="eqBadge"></span></span>
+      </div>
+      <div class="constraint-row">
+        <span>Actual velocity at governing flow</span>
+        <span class="val" id="actualVelocity">--</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    The governing flow rate is whichever constraint is <b>lower</b> — a pipe can only carry as
+    much gas as its tighter limit allows, whether that's the velocity you're willing to
+    tolerate (erosion, noise, control-valve trim wear) or the pressure the pipeline segment
+    can give up over its length under the Weymouth equation. Z is left as a simple
+    editable number (default 1.0, ideal gas) — a rigorous design would pull Z from a
+    correlation such as Standing-Katz or CNGA based on gas composition, pressure, and
+    temperature. Wall thickness here is fixed to Standard weight (STD, equal to Schedule 40
+    for NPS 10" and smaller; a constant 0.375" for NPS 12" and larger per ASME B36.10) rather
+    than a pressure-design calculation — for a full Barlow-equation pressure-design check, or
+    to use a different schedule, use the diameter calculator instead. This is a
+    preliminary/educational tool; verify results against the current edition of the
+    applicable code before use in real design.
+  </div>
+</div>
+
+<script>
+const NPS_OD_IN = [{"nps": "1/8", "od_in": 0.405, "walls": [0.049, 0.068, 0.095]}, {"nps": "1/4", "od_in": 0.54, "walls": [0.065, 0.088, 0.119]}, {"nps": "3/8", "od_in": 0.675, "walls": [0.065, 0.091, 0.126]}, {"nps": "1/2", "od_in": 0.84, "walls": [0.065, 0.083, 0.109, 0.147, 0.188, 0.294]}, {"nps": "3/4", "od_in": 1.05, "walls": [0.065, 0.083, 0.113, 0.154, 0.219, 0.308]}, {"nps": "1", "od_in": 1.315, "walls": [0.065, 0.109, 0.133, 0.179, 0.25, 0.358]}, {"nps": "1-1/4", "od_in": 1.66, "walls": [0.065, 0.109, 0.14, 0.191, 0.25, 0.382]}, {"nps": "1-1/2", "od_in": 1.9, "walls": [0.065, 0.109, 0.145, 0.2, 0.281, 0.4]}, {"nps": "2", "od_in": 2.375, "walls": [0.065, 0.109, 0.154, 0.218, 0.344, 0.436]}, {"nps": "2-1/2", "od_in": 2.875, "walls": [0.083, 0.12, 0.203, 0.276, 0.375, 0.552]}, {"nps": "3", "od_in": 3.5, "walls": [0.083, 0.12, 0.216, 0.3, 0.438, 0.6]}, {"nps": "3-1/2", "od_in": 4.0, "walls": [0.083, 0.12, 0.226, 0.318, 0.636]}, {"nps": "4", "od_in": 4.5, "walls": [0.083, 0.12, 0.156, 0.188, 0.237, 0.337, 0.438, 0.531, 0.674]}, {"nps": "4-1/2", "od_in": 5.0, "walls": [0.247, 0.355, 0.71]}, {"nps": "5", "od_in": 5.563, "walls": [0.109, 0.134, 0.258, 0.375, 0.5, 0.625, 0.75]}, {"nps": "6", "od_in": 6.625, "walls": [0.109, 0.134, 0.188, 0.28, 0.432, 0.562, 0.719, 0.864]}, {"nps": "7", "od_in": 7.625, "walls": [0.301, 0.5, 0.875]}, {"nps": "8", "od_in": 8.625, "walls": [0.109, 0.148, 0.25, 0.277, 0.322, 0.406, 0.5, 0.594, 0.719, 0.812, 0.875, 0.906]}, {"nps": "9", "od_in": 9.625, "walls": [0.342, 0.5, 0.875]}, {"nps": "10", "od_in": 10.75, "walls": [0.134, 0.165, 0.188, 0.25, 0.307, 0.365, 0.5, 0.594, 0.719, 0.844, 1.0, 1.125]}, {"nps": "11", "od_in": 11.75, "walls": [0.375, 0.5, 0.875]}, {"nps": "12", "od_in": 12.75, "walls": [0.156, 0.18, 0.188, 0.25, 0.33, 0.375, 0.406, 0.5, 0.562, 0.688, 0.844, 1.0, 1.125, 1.312]}, {"nps": "14", "od_in": 14.0, "walls": [0.188, 0.25, 0.312, 0.375, 0.438, 0.5, 0.594, 0.75, 0.938, 1.094, 1.25, 1.406]}, {"nps": "16", "od_in": 16.0, "walls": [0.188, 0.25, 0.312, 0.375, 0.5, 0.656, 0.844, 1.031, 1.219, 1.438, 1.594]}, {"nps": "18", "od_in": 18.0, "walls": [0.188, 0.25, 0.312, 0.375, 0.438, 0.5, 0.562, 0.75, 0.938, 1.156, 1.375, 1.562, 1.781]}, {"nps": "20", "od_in": 20.0, "walls": [0.218, 0.25, 0.375, 0.5, 0.594, 0.812, 1.031, 1.281, 1.5, 1.75, 1.969]}, {"nps": "22", "od_in": 22.0, "walls": [0.218, 0.25, 0.375, 0.5, 0.875, 1.125, 1.375, 1.625, 1.875, 2.125]}, {"nps": "24", "od_in": 24.0, "walls": [0.25, 0.375, 0.5, 0.562, 0.688, 0.969, 1.219, 1.531, 1.812, 2.062, 2.344]}, {"nps": "26", "od_in": 26.0, "walls": [0.312, 0.375, 0.5]}, {"nps": "28", "od_in": 28.0, "walls": [0.312, 0.375, 0.5, 0.625]}, {"nps": "30", "od_in": 30.0, "walls": [0.312, 0.375, 0.5, 0.625]}, {"nps": "32", "od_in": 32.0, "walls": [0.312, 0.375, 0.5, 0.625, 0.688]}, {"nps": "34", "od_in": 34.0, "walls": [0.312, 0.375, 0.5, 0.625, 0.688]}, {"nps": "36", "od_in": 36.0, "walls": [0.312, 0.375, 0.5]}, {"nps": "42", "od_in": 42.0, "walls": [0.375, 0.5, 0.625, 0.75]}, {"nps": "48", "od_in": 48.0, "walls": [0.375, 0.5]}];
+
+function parseNPS(npsLabel){
+  const parts = npsLabel.split('-');
+  if (parts.length === 2 && parts[1].includes('/')) {
+    const whole = parseFloat(parts[0]);
+    const [num, den] = parts[1].split('/').map(Number);
+    return whole + num / den;
+  }
+  if (npsLabel.includes('/')) {
+    const [num, den] = npsLabel.split('/').map(Number);
+    return num / den;
+  }
+  return parseFloat(npsLabel);
+}
+const EVEN_NPS_OD_IN = NPS_OD_IN.filter(p => {
+  const n = parseNPS(p.nps);
+  return Number.isInteger(n) && n % 2 === 0;
+});
+
+const M_TO_IN = 39.3701;
+const IN_TO_MM = 25.4;
+const CFS_TO_M3S = 0.0283168;
+const VEL_TO_MS = { fts: 0.3048, ms: 1 };
+const P_STD_PSIA = 14.73;
+const T_STD_R = 60 + 459.67;
+
+// This calculator always uses the Weymouth equation (see Section 03 note).
+const WEYMOUTH = { C: 433.5, a: 1.0, b: 1.0, c: 0.5, e: 2.667 };
+
+function populateODDropdown(){
+  const sel = document.getElementById('pipeOD');
+  sel.innerHTML = EVEN_NPS_OD_IN.map(p =>
+    `<option value="${p.od_in}">NPS ${p.nps} — OD ${p.od_in.toFixed(3)} in</option>`
+  ).join('');
+}
+
+// STD weight = Schedule 40 for NPS <=10; STD is fixed at 0.375" for NPS 12
+// and above (Schedule 40 keeps increasing past 10", but STD does not) —
+// this is the standard ASME B36.10 definition of "Standard weight" pipe.
+const STD_WALL_BY_NPS = {
+  '2': 0.154, '4': 0.237, '6': 0.280, '8': 0.322, '10': 0.365,
+  '12': 0.375, '14': 0.375, '16': 0.375, '18': 0.375, '20': 0.375,
+  '22': 0.375, '24': 0.375, '26': 0.375, '28': 0.375, '30': 0.375,
+  '32': 0.375, '34': 0.375, '36': 0.375, '42': 0.375, '48': 0.375
+};
+
+function populateWallDropdown(){
+  const od = parseFloat(document.getElementById('pipeOD').value);
+  const sizeEntry = EVEN_NPS_OD_IN.find(p => Math.abs(p.od_in - od) < 0.0005);
+  const sel = document.getElementById('pipeWall');
+  if (!sizeEntry) { sel.innerHTML = ''; return; }
+  const stdWall = STD_WALL_BY_NPS[sizeEntry.nps];
+  sel.innerHTML = `<option value="${stdWall}" selected>${stdWall.toFixed(3)} in (STD / Sch 40)</option>`;
+}
+
+function currentPipe(){
+  const OD = parseFloat(document.getElementById('pipeOD').value);
+  const wall = parseFloat(document.getElementById('pipeWall').value);
+  const ID = OD - 2 * wall;
+  return { OD, wall, ID };
+}
+
+function updatePipeSummary(){
+  const { OD, wall, ID } = currentPipe();
+  document.getElementById('pipeSummary').textContent =
+    `OD ${OD.toFixed(3)} in  −  2 × wall ${wall.toFixed(3)} in  =  ID ${ID.toFixed(3)} in (${(ID*IN_TO_MM).toFixed(1)} mm)`;
+}
+
+/* ============================================================
+   VELOCITY-LIMITED FLOW
+   Continuity: Q_actual = V * A. Convert the actual (flowing-condition)
+   volumetric rate back to a standard-condition rate (scfd) using the
+   inverse of the ideal-gas correction used on the diameter calculator:
+   Q_std = Q_actual / [(P_std/P_flow) * (T_flow/T_std)]
+   ============================================================ */
+function velocityLimitedFlow_scfd(ID_in){
+  const V = parseFloat(document.getElementById('maxVelocity').value) || 0;
+  const velUnit = document.getElementById('velUnit').value;
+  const V_ms = V * VEL_TO_MS[velUnit];
+
+  const P1_psig = parseFloat(document.getElementById('upstreamP').value) || 0;
+  const P2_psig = parseFloat(document.getElementById('downstreamP').value) || 0;
+  const P_avg_psia = ((P1_psig + P2_psig) / 2) + 14.7;
+  const T_flow_F = parseFloat(document.getElementById('flowTemp').value) || 60;
+  const T_flow_R = T_flow_F + 459.67;
+
+  const r_m = (ID_in / 2) * 0.0254; // inches -> meters
+  const A_m2 = Math.PI * r_m * r_m;
+  const Q_actual_m3s = A_m2 * V_ms;
+
+  const correction = (P_STD_PSIA / P_avg_psia) * (T_flow_R / T_STD_R);
+  const Q_std_m3s = Q_actual_m3s / correction;
+  const Q_std_scfd = (Q_std_m3s / CFS_TO_M3S) * 86400;
+  return Q_std_scfd;
+}
+
+/* ============================================================
+   EQUATION-OF-STATE-LIMITED FLOW (Weymouth / Panhandle A / B)
+   Direct forward form (see diameter calculator for the D-solved version):
+   Q = C * (Tb/Pb)^a * [(P1²-P2²)/(G^b * Tf * L * Z)]^c * D^e
+   ============================================================ */
+function equationLimitedFlow_scfd(ID_in){
+  const eq = WEYMOUTH;
+
+  const P1_psia = (parseFloat(document.getElementById('upstreamP').value) || 0) + 14.7;
+  const P2_psia = (parseFloat(document.getElementById('downstreamP').value) || 0) + 14.7;
+  const T_flow_R = (parseFloat(document.getElementById('flowTemp').value) || 60) + 459.67;
+  const L_miles = parseFloat(document.getElementById('pipeLength').value) || 0.001;
+  const G = parseFloat(document.getElementById('gasGravity').value) || 0.6;
+  const Z = parseFloat(document.getElementById('zFactor').value) || 1.0;
+
+  const deltaP2 = Math.max(P1_psia * P1_psia - P2_psia * P2_psia, 0);
+  const bracket = deltaP2 / (Math.pow(G, eq.b) * T_flow_R * L_miles * Z);
+  const coefficient = eq.C * Math.pow(T_STD_R / P_STD_PSIA, eq.a) * Math.pow(bracket, eq.c);
+
+  return coefficient * Math.pow(ID_in, eq.e); // scfd
+}
+
+function recalcAll(){
+  updatePipeSummary();
+
+  const { ID } = currentPipe();
+  const velFlow_scfd = velocityLimitedFlow_scfd(ID);
+  const eqFlow_scfd = equationLimitedFlow_scfd(ID);
+
+  const velFlow_mmscfd = velFlow_scfd / 1e6;
+  const eqFlow_mmscfd = eqFlow_scfd / 1e6;
+  const governing_mmscfd = Math.min(velFlow_mmscfd, eqFlow_mmscfd);
+  const velGoverns = velFlow_mmscfd <= eqFlow_mmscfd;
+
+  document.getElementById('velLimitedFlow').textContent = velFlow_mmscfd.toFixed(3);
+  document.getElementById('eqLimitedFlow').textContent = eqFlow_mmscfd.toFixed(3);
+  document.getElementById('governingFlow').textContent = governing_mmscfd.toFixed(3);
+  document.getElementById('governingNote').textContent =
+    velGoverns ? 'Velocity limit governs' : 'Weymouth pressure limit governs';
+
+  document.getElementById('velBadge').textContent = velGoverns ? 'GOVERNS' : 'HAS SLACK';
+  document.getElementById('velBadge').className = 'constraint-badge ' + (velGoverns ? 'governs' : 'slack');
+  document.getElementById('eqBadge').textContent = !velGoverns ? 'GOVERNS' : 'HAS SLACK';
+  document.getElementById('eqBadge').className = 'constraint-badge ' + (!velGoverns ? 'governs' : 'slack');
+
+  // Actual velocity at the governing flow, for sanity-checking the result.
+  const governing_scfd = governing_mmscfd * 1e6;
+  const P1_psig = parseFloat(document.getElementById('upstreamP').value) || 0;
+  const P2_psig = parseFloat(document.getElementById('downstreamP').value) || 0;
+  const P_avg_psia = ((P1_psig + P2_psig) / 2) + 14.7;
+  const T_flow_R = (parseFloat(document.getElementById('flowTemp').value) || 60) + 459.67;
+  const correction = (P_STD_PSIA / P_avg_psia) * (T_flow_R / T_STD_R);
+  const Q_actual_m3s = ((governing_scfd / 86400) * CFS_TO_M3S) * correction;
+  const r_m = (ID / 2) * 0.0254;
+  const A_m2 = Math.PI * r_m * r_m;
+  const V_ms = Q_actual_m3s / A_m2;
+  const V_fts = V_ms / 0.3048;
+  document.getElementById('actualVelocity').textContent = V_fts.toFixed(2) + ' ft/s (' + V_ms.toFixed(2) + ' m/s)';
+}
+
+populateODDropdown();
+document.getElementById('pipeOD').value = String(EVEN_NPS_OD_IN.find(p => p.nps === '8').od_in);
+populateWallDropdown();
+
+document.getElementById('pipeOD').addEventListener('change', function(){
+  populateWallDropdown();
+  recalcAll();
+});
+document.querySelectorAll('.workbench input, .workbench select').forEach(el => {
+  el.addEventListener('input', recalcAll);
+  el.addEventListener('change', recalcAll);
+});
+
+recalcAll();
+</script>
